@@ -208,14 +208,33 @@ function table(resource) {
 }
 
 /* ── точка входа Yandex Cloud Function ───────────────────────────────────── */
-const CORS = {
-  "Access-Control-Allow-Origin": ALLOW_ORIGIN,
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Content-Type": "application/json",
-};
+// ALLOW_ORIGIN — список источников через запятую (или "*"). В ответе отражаем
+// именно тот Origin, с которого пришёл запрос, если он в списке.
+const ALLOWED = (ALLOW_ORIGIN || "*").split(",").map((s) => s.trim()).filter(Boolean);
+function headerVal(event, name) {
+  const h = (event && event.headers) || {};
+  for (const k in h) if (k.toLowerCase() === name) return h[k];
+  return null;
+}
+function corsFor(event) {
+  const origin = headerVal(event, "origin");
+  let allow;
+  if (ALLOWED.includes("*")) allow = "*";
+  else if (origin && ALLOWED.includes(origin)) allow = origin;
+  else allow = ALLOWED[0] || "*";
+  return {
+    "Access-Control-Allow-Origin": allow,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Content-Type": "application/json",
+    "Vary": "Origin",
+  };
+}
 
 module.exports.handler = async function (event) {
+  const CORS = corsFor(event);
+  const reply = (statusCode, obj) => ({ statusCode, headers: CORS, body: JSON.stringify(obj) });
+
   const method = (event && (event.httpMethod || event.method)) || "POST";
   if (method === "OPTIONS") return { statusCode: 204, headers: CORS, body: "" };
   if (method !== "POST") return reply(405, { ok: false, error: "Только POST" });
@@ -243,7 +262,3 @@ module.exports.handler = async function (event) {
     return reply(status, { ok: false, error: e.message || "Внутренняя ошибка" });
   }
 };
-
-function reply(statusCode, obj) {
-  return { statusCode, headers: CORS, body: JSON.stringify(obj) };
-}
