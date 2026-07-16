@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Портал Ордена XLIX</title>
+<link rel="stylesheet" href="./styles.css">
+<style>
+  html, body { margin: 0; background: #f3f2f2; }
+  a { color: #7d5411; }
+  a:hover { color: #b68235; }
+  @keyframes sealFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  [hidden] { display: none !important; }
+  .loading { min-height: 100vh; display: grid; place-items: center; color: #8d8371;
+    font-family: 'Cormorant Garamond', serif; letter-spacing: .2em; text-transform: uppercase; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">Sigillum XLIX</div></div>
+
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ordo-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["backend/local-server.js"],
+      "port": 8787
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ordo XLIX · Управление</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  html, body { margin: 0; background: #f3f2f2; }
+  [hidden] { display: none !important; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+  .row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .toolbar { display: flex; gap: 8px; align-items: center; margin: 18px 0; flex-wrap: wrap; }
+  .toolbar .spacer { flex: 1; }
+  .msg { padding: 8px 12px; border-radius: 4px; font-size: 13px; margin: 12px 0; }
+  .msg.err { background: #fbe4dc; color: #8a3c1f; }
+  .msg.ok  { background: #fff3e4; color: #7d5411; }
+  .item-actions { display: flex; gap: 6px; }
+  .login-box { max-width: 360px; margin: 12vh auto 0; display: flex; flex-direction: column; gap: 12px; }
+  fieldset { border: 1px solid var(--color-divider); border-radius: 6px; padding: 14px; margin: 0 0 16px; }
+  legend { font-family: var(--font-heading); font-weight: 600; padding: 0 6px; }
+  label span { display:block; font-size:12px; margin-bottom:4px; color: color-mix(in srgb, var(--color-text) 70%, transparent); }
+  th.actions, td.actions { width: 150px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- ── Вход ── -->
+  <div id="login" hidden>
+    <div class="login-box">
+      <h2 style="text-align:center">Ordo XLIX · Управление</h2>
+      <label><span>Логин</span><input id="lg-login" class="input" autocomplete="username"></label>
+      <label><span>Пароль</span><input id="lg-pass" class="input" type="password" autocomplete="current-password"></label>
+      <button id="lg-btn" class="btn btn-primary btn-block">Войти</button>
+      <div id="lg-msg"></div>
+    </div>
+  </div>
+
+  <!-- ── Панель ── -->
+  <div id="panel" hidden>
+    <div class="toolbar">
+      <h2 style="margin:0">Управление Орденом</h2>
+      <span class="spacer"></span>
+      <button class="btn btn-secondary" data-res="members">Участники</button>
+      <button class="btn btn-secondary" data-res="meetings">Собрания</button>
+      <button class="btn btn-secondary" data-res="keepers">Хранители</button>
+      <button class="btn btn-secondary" data-res="rules">Устав</button>
+      <button id="logout" class="btn btn-ghost">Выход</button>
+    </div>
+    <div id="msg"></div>
+    <div id="editor"></div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script src="../config.js"></script>
+<script>
+const API = window.ORDO_API;
+let token = sessionStorage.getItem("ordo_admin_token") || null;
+let current = "members";
+
+const FIELDS = {
+  members:  [["name","Имя"],["token_number","Жетон №"],["degree","Степень"],["line","Линия"],["admitted","Принят"],["status","Статус"]],
+  meetings: [["date","Дата"],["title","Название"],["note","Примечание","area"],["house","Дом"],["access","Допуск"],["tag_class","CSS-класс метки"],["sort","Порядок","num"]],
+  keepers:  [["name","Название"],["since","С какого года"],["duty","Обязанность","area"],["heir","Наследник"],["sort","Порядок","num"]],
+  rules:    [["num","Номер (I, II…)"],["title","Заголовок"],["text","Текст","area"],["sort","Порядок","num"]],
+};
+const TITLES = { members:"Участники", meetings:"Собрания", keepers:"Хранители", rules:"Устав" };
+
+async function api(action, payload = {}) {
+  const res = await fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, token, ...payload }),
+  });
+  let data = {}; try { data = await res.json(); } catch (_) {}
+  if (!res.ok || data.ok === false) throw new Error(data.error || `Ошибка ${res.status}`);
+  return data;
+}
+
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function msg(el, text, kind){ el.innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : ""; }
+
+/* ── вход ── */
+async function doLogin() {
+  const login = document.getElementById("lg-login").value.trim();
+  const password = document.getElementById("lg-pass").value;
+  try {
+    const { token: t } = await api("admin.login", { login, password });
+    token = t; sessionStorage.setItem("ordo_admin_token", t);
+    showPanel();
+  } catch (e) { msg(document.getElementById("lg-msg"), e.message, "err"); }
+}
+
+function showLogin(){ document.getElementById("login").hidden = false; document.getElementById("panel").hidden = true; }
+function showPanel(){ document.getElementById("login").hidden = true; document.getElementById("panel").hidden = false; load(current); }
+function logout(){ token = null; sessionStorage.removeItem("ordo_admin_token"); showLogin(); }
+
+/* ── список ── */
+async function load(resource) {
+  current = resource;
+  const listEl = document.getElementById("list");
+  const M = document.getElementById("msg");
+  renderEditor(); // пустая форма создания
+  try {
+    const { items } = await api("admin.list", { resource });
+    const fields = FIELDS[resource];
+    listEl.innerHTML = `
+      <h3>${TITLES[resource]} — записи (${items.length})</h3>
+      <div style="overflow-x:auto"><table class="table">
+        <thead><tr>${fields.map(f=>`<th>${esc(f[1])}</th>`).join("")}<th class="actions">Действия</th></tr></thead>
+        <tbody>${items.map(it => `
+          <tr>
+            ${fields.map(f => `<td>${esc(String(it[f[0]]??"")).slice(0,80)}</td>`).join("")}
+            <td class="actions item-actions">
+              <button class="btn btn-ghost" data-edit="${it.id}">✎</button>
+              <button class="btn btn-ghost" data-del="${it.id}" style="color:#8a3c1f">✕</button>
+              ${resource==="members"?`<button class="btn btn-ghost" data-pw="${it.id}">🔑</button>`:""}
+            </td>
+          </tr>`).join("")}</tbody>
+      </table></div>`;
+    // сохраним для редактирования
+    listEl._items = items;
+    listEl.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>renderEditor(items.find(i=>i.id==b.dataset.edit)));
+    listEl.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>del(b.dataset.del));
+    listEl.querySelectorAll("[data-pw]").forEach(b=>b.onclick=()=>setPw(b.dataset.pw));
+    msg(M, "", "");
+  } catch (e) {
+    if (String(e.message).includes("администратор")) return logout();
+    msg(M, e.message, "err");
+  }
+}
+
+/* ── форма создания/редактирования ── */
+function renderEditor(item) {
+  const fields = FIELDS[current];
+  const editing = item && item.id;
+  document.getElementById("editor").innerHTML = `
+    <fieldset>
+      <legend>${editing ? "Редактирование #"+item.id : "Новая запись — "+TITLES[current]}</legend>
+      <div class="row">
+        ${fields.map(f => {
+          const v = item ? (item[f[0]]??"") : "";
+          if (f[2]==="area") return `<label style="grid-column:1/-1"><span>${esc(f[1])}</span><textarea class="input" data-k="${f[0]}">${esc(v)}</textarea></label>`;
+          const type = f[2]==="num" ? "number" : "text";
+          return `<label><span>${esc(f[1])}</span><input class="input" type="${type}" data-k="${f[0]}" value="${esc(v)}"></label>`;
+        }).join("")}
+      </div>
+      <div class="toolbar">
+        <button id="save" class="btn btn-primary">${editing ? "Сохранить" : "Создать"}</button>
+        ${editing ? `<button id="cancel" class="btn btn-secondary">Отмена</button>` : ""}
+      </div>
+    </fieldset>`;
+  document.getElementById("save").onclick = () => save(editing ? item.id : null);
+  const cancel = document.getElementById("cancel");
+  if (cancel) cancel.onclick = () => renderEditor();
+}
+
+function collect() {
+  const data = {};
+  document.querySelectorAll("#editor [data-k]").forEach(el => {
+    let v = el.value;
+    if (el.type === "number") v = v === "" ? 0 : Number(v);
+    data[el.dataset.k] = v;
+  });
+  return data;
+}
+
+async function save(id) {
+  const M = document.getElementById("msg");
+  try {
+    const data = collect();
+    if (id) await api("admin.update", { resource: current, id, data });
+    else await api("admin.create", { resource: current, data });
+    msg(M, "Сохранено", "ok");
+    load(current);
+  } catch (e) { msg(M, e.message, "err"); }
+}
+
+async function del(id) {
+  if (!confirm("Удалить запись #" + id + "?")) return;
+  const M = document.getElementById("msg");
+  try { await api("admin.delete", { resource: current, id }); msg(M, "Удалено", "ok"); load(current); }
+  catch (e) { msg(M, e.message, "err"); }
+}
+
+async function setPw(id) {
+  const password = prompt("Новое слово доверия для участника #" + id + ":");
+  if (!password) return;
+  const M = document.getElementById("msg");
+  try { await api("admin.member_password", { id, password }); msg(M, "Слово доверия обновлено", "ok"); }
+  catch (e) { msg(M, e.message, "err"); }
+}
+
+/* ── старт ── */
+document.getElementById("lg-btn").onclick = doLogin;
+document.getElementById("lg-pass").onkeydown = (e) => { if (e.key === "Enter") doLogin(); };
+document.getElementById("logout").onclick = logout;
+document.querySelectorAll("[data-res]").forEach(b => b.onclick = () => load(b.dataset.res));
+
+if (!API || API.startsWith("REPLACE_WITH")) {
+  document.querySelector(".wrap").innerHTML = '<div class="msg err" style="margin-top:20vh">Укажите адрес функции в <code>config.js</code>.</div>';
+} else if (token) showPanel(); else showLogin();
+</script>
+</body>
+</html>
