@@ -17,10 +17,20 @@
 
 "use strict";
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 const { Pool } = require("pg");
 
 const ALLOW_ORIGIN = process.env.ALLOW_ORIGIN || "*";
 const JWT_SECRET = process.env.JWT_SECRET || "change-me";
+
+// Корневой сертификат YC: из переменной PG_CA либо из файла ca.pem рядом с кодом
+// (многострочный PEM надёжнее возить в архиве, чем через --environment).
+function readCA() {
+  if (process.env.PG_CA && process.env.PG_CA.includes("BEGIN CERTIFICATE")) return process.env.PG_CA;
+  try { return fs.readFileSync(path.join(__dirname, "ca.pem"), "utf8"); } catch (_) { return null; }
+}
+const PG_CA = readCA();
 
 /* ── пул соединений (переживает тёплые вызовы функции) ───────────────────── */
 let pool;
@@ -35,8 +45,8 @@ function db() {
       max: 2,
       idleTimeoutMillis: 5000,
       connectionTimeoutMillis: 8000,
-      ssl: process.env.PG_CA
-        ? { ca: process.env.PG_CA, rejectUnauthorized: true }
+      ssl: PG_CA
+        ? { ca: PG_CA, rejectUnauthorized: true }
         : { rejectUnauthorized: false },
     });
   }
