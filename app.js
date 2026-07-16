@@ -138,7 +138,7 @@ function viewUnlocked() {
         <div class="card">
           <div class="card-kicker">Ближайшее собрание</div>
           <div class="card-title">${esc(nearest.title)} · ${esc(nearest.date)}</div>
-          <p class="card-body">${esc(nearest.note || "")} Жетон предъявляется при входе вместо имени. Опоздавшие не допускаются.</p>
+          <p class="card-body">${nearest.house && nearest.house !== "—" ? esc(nearest.house) + ". " : ""}${nearest.note ? esc(nearest.note) + ". " : ""}Жетон предъявляется при входе вместо имени; опоздавшие не допускаются.</p>
         </div>` : ""}
         <p style="font-family:'Cormorant Garamond',serif;font-size:19px;color:#605d5d;font-style:italic;margin:0">«Тот, кто способен увидеть обе сорок девятки одновременно, уже находится на полпути.»</p>
       </div>
