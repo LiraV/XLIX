@@ -4,7 +4,7 @@
    sessionStorage. Внешний вид повторяет исходный дизайн один в один. */
 
 const API = window.ORDO_API;
-const TOKEN_IMG = "./uploads/sign.jpg";
+const TOKEN_IMG = "./uploads/sign.jpg?v=2";
 
 const state = {
   token: sessionStorage.getItem("ordo_token") || null,
