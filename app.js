@@ -147,7 +147,7 @@ function viewUnlocked() {
   const statut = `
     <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#a06f24">Устав · Lex tacita</div>
     <h1 style="font-weight:400;font-size:46px;margin:8px 0 6px">Устав Ордена</h1>
-    <p class="text-muted" style="font-size:15px;max-width:56ch">Орден не ведёт списков, не выдаёт документов и не ставит печатей. Единственным доказательством доверия остаётся жетон «49». Устав передаётся устно; здесь изложено лишь то, что дозволено записи.</p>
+    <p class="text-muted" style="font-size:15px;max-width:56ch">Орден не выдаёт документов и не ставит печатей. Единственным доказательством доверия остаётся жетон «49». Устав передаётся устно; здесь изложено лишь то, что дозволено записи.</p>
     <hr class="hr">
     <div style="max-width:640px;display:flex;flex-direction:column;gap:26px">
       ${c.rules.map((r) => `
