@@ -6,6 +6,20 @@
 const API = window.ORDO_API;
 const TOKEN_IMG = "./uploads/sign.jpg?v=2";
 
+/* ── масонская символика (линейные SVG, наследуют currentColor) ──────────── */
+const SVG = {
+  "square-compass": `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 40 L24 10 L39 40"/><path d="M39 8 L14 40 M9 8 L34 40"/><circle cx="24" cy="8" r="1.6" fill="currentColor" stroke="none"/><path d="M17 40h14"/><text x="24" y="34" font-size="7" text-anchor="middle" fill="currentColor" stroke="none" font-family="serif">G</text></svg>`,
+  "eye": `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M24 8 L40 38 H8 Z"/><path d="M16 27 q8 -8 16 0 q-8 8 -16 0Z"/><circle cx="24" cy="27" r="2.4" fill="currentColor" stroke="none"/><g stroke-width="1"><path d="M24 4v-3M35 9l2-2M13 9l-2-2M40 20l3-1M8 20l-3-1"/></g></svg>`,
+  "columns": `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><g><rect x="9" y="14" width="8" height="24"/><path d="M7 14h12M7 38h12M11 18v16M15 18v16"/><circle cx="13" cy="10" r="3"/></g><g><rect x="31" y="14" width="8" height="24"/><path d="M29 14h12M29 38h12M33 18v16M37 18v16"/><circle cx="35" cy="10" r="3"/></g></svg>`,
+  "acacia": `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M24 42 V14"/><path d="M24 26 q-8 -3 -12 -10 M24 26 q8 -3 12 -10 M24 18 q-6 -2 -9 -8 M24 18 q6 -2 9 -8 M24 34 q-6 -2 -10 -7 M24 34 q6 -2 10 -7"/><circle cx="24" cy="10" r="2"/></svg>`,
+  "plumb": `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M10 12 H38 L24 40 Z"/><path d="M24 12 V33"/><circle cx="24" cy="36" r="2.4" fill="currentColor" stroke="none"/></svg>`,
+  "mosaic": `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1"><rect x="10" y="10" width="28" height="28"/><g fill="currentColor" stroke="none"><rect x="10" y="10" width="7" height="7"/><rect x="24" y="10" width="7" height="7"/><rect x="17" y="17" width="7" height="7"/><rect x="31" y="17" width="7" height="7"/><rect x="10" y="24" width="7" height="7"/><rect x="24" y="24" width="7" height="7"/><rect x="17" y="31" width="7" height="7"/><rect x="31" y="31" width="7" height="7"/></g></svg>`,
+  "trowel": `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M8 12 L30 12 L14 34 Z"/><path d="M22 20 L34 32 M32 30 q6 4 8 8"/></svg>`,
+  "hourglass": `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M14 8h20M14 40h20"/><path d="M14 8 Q14 24 24 24 Q34 24 34 8 M14 40 Q14 24 24 24 Q34 24 34 40"/></svg>`,
+  "delta": `<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M30 10 L52 48 H8 Z"/><g stroke-width="0.9"><path d="M30 5 V0 M44 9 l3-3 M16 9 l-3-3 M52 26 l5-2 M8 26 l-5-2"/></g><text x="30" y="42" font-size="13" text-anchor="middle" fill="currentColor" stroke="none" font-family="serif">49</text></svg>`,
+};
+function glyph(key) { return SVG[key] || SVG["delta"]; }
+
 const state = {
   token: sessionStorage.getItem("ordo_token") || null,
   member: safeParse(sessionStorage.getItem("ordo_member")),
@@ -63,8 +77,9 @@ async function submitPw() {
 }
 
 async function loadContent() {
-  const { rules, meetings, keepers, member } = await api("content");
-  state.content = { rules, meetings, keepers };
+  const data = await api("content");
+  const { member, ok, ...content } = data;
+  state.content = content;
   if (member) state.member = member;
 }
 
@@ -112,9 +127,9 @@ function viewLocked() {
 
 function viewUnlocked() {
   const m = state.member || {};
-  const c = state.content || { rules: [], meetings: [], keepers: [] };
+  const c = state.content || {};
   const cur = (t) => (state.tab === t ? 'aria-current="page"' : "");
-  const nearest = c.meetings[0];
+  const nearest = (c.meetings || [])[0];
 
   const cabinet = `
     <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#a06f24;font-feature-settings:'tnum'">Личный кабинет · Circulus interior</div>
@@ -150,7 +165,7 @@ function viewUnlocked() {
     <p class="text-muted" style="font-size:15px;max-width:56ch">Орден не выдаёт документов и не ставит печатей. Единственным доказательством доверия остаётся жетон «49». Устав передаётся устно; здесь изложено лишь то, что дозволено записи.</p>
     <hr class="hr">
     <div style="max-width:640px;display:flex;flex-direction:column;gap:26px">
-      ${c.rules.map((r) => `
+      ${(c.rules || []).map((r) => `
         <div style="display:grid;grid-template-columns:64px 1fr;gap:20px;border-bottom:1px solid rgba(32,31,29,.1);padding-bottom:22px">
           <div style="font-family:'Cormorant Garamond',serif;font-size:32px;color:#c28d41;font-feature-settings:'tnum';line-height:1">${esc(r.num)}</div>
           <div>
@@ -169,7 +184,7 @@ function viewUnlocked() {
     <table class="table">
       <thead><tr><th style="width:190px">Дата</th><th>Собрание</th><th>Дом</th><th style="width:130px">Допуск</th></tr></thead>
       <tbody>
-        ${c.meetings.map((mt) => `
+        ${(c.meetings || []).map((mt) => `
           <tr>
             <td style="font-feature-settings:'tnum'">${esc(mt.date)}</td>
             <td><span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px">${esc(mt.title)}</span><br><span class="text-muted" style="font-size:13px">${esc(mt.note || "")}</span></td>
@@ -186,7 +201,7 @@ function viewUnlocked() {
     <p class="text-muted" style="font-size:15px;max-width:56ch">Знаки передаются внутри семей-хранителей. Каждое поколение выбирает лишь одного наследника, которому доверяется право однажды передать знак следующему человеку.</p>
     <hr class="hr">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px" class="keep-grid">
-      ${c.keepers.map((k) => `
+      ${(c.keepers || []).map((k) => `
         <div class="card">
           <div class="card-kicker">${esc(k.since || "")}</div>
           <div class="card-title">${esc(k.name)}</div>
@@ -199,29 +214,136 @@ function viewUnlocked() {
       <p class="card-body" style="font-size:14px;line-height:1.7">Большинство известных жетонов несут следы времени — трещины и сколы. В Ордене считается, что повреждения отражают историю владельцев и никогда не должны реставрироваться. Изготовление копий запрещено: ни один жетон не бывает полностью одинаковым.</p>
     </div>`;
 
-  const sections = { cabinet, statut, meetings, keepers };
+  const sechead = (kicker, title, intro) => `
+    <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#a06f24">${kicker}</div>
+    <h1 style="font-weight:400;font-size:46px;margin:8px 0 6px">${title}</h1>
+    <p class="text-muted" style="font-size:15px;max-width:56ch">${intro}</p>
+    <hr class="hr">`;
+
+  const symbols = `
+    ${sechead("Символы · Arcana", "Язык знаков", "Орден говорит не словами, а символами. Каждый знак — ступень к пониманию; толкование передаётся наставником, здесь изложена лишь его тень.")}
+    <div class="grid-2">
+      ${(c.symbols || []).map((s) => `
+        <div class="card" style="flex-direction:row;gap:16px;align-items:flex-start">
+          <div style="width:54px;height:54px;flex:none;color:#c28d41">${glyph(s.glyph)}</div>
+          <div>
+            <div class="card-title">${esc(s.name)}</div>
+            <div class="card-kicker" style="margin:2px 0 6px;color:#a06f24;font-style:italic;text-transform:none;letter-spacing:.04em">${esc(s.latin || "")}</div>
+            <p class="card-body">${esc(s.meaning || "")}</p>
+          </div>
+        </div>`).join("")}
+    </div>`;
+
+  const degrees = `
+    ${sechead("Степени · Gradus", "Ступени посвящения", "Путь ведёт от грубого камня к совершенному. Ни одна ступень не даётся по просьбе — только по признанию достойного.")}
+    <table class="table">
+      <thead><tr><th style="width:190px">Степень</th><th>Права</th><th>Обязанности</th></tr></thead>
+      <tbody>
+        ${(c.degrees || []).map((d) => `
+          <tr>
+            <td><span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px">${esc(d.name)}</span><br><span class="text-muted" style="font-size:12px;font-style:italic">${esc(d.latin || "")}</span></td>
+            <td class="text-muted">${esc(d.rights || "")}</td>
+            <td class="text-muted">${esc(d.duties || "")}</td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+
+  const officers = `
+    ${sechead("Офицеры · Officia", "Должности капитула", "Работами руководят семь офицеров и страж у дверей. Имена не называются — за них говорят жетоны.")}
+    <table class="table">
+      <thead><tr><th style="width:230px">Должность</th><th style="width:120px">Жетон</th><th>Обязанность</th></tr></thead>
+      <tbody>
+        ${(c.officers || []).map((o) => `
+          <tr>
+            <td><span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px">${esc(o.role)}</span><br><span class="text-muted" style="font-size:12px;font-style:italic">${esc(o.latin || "")}</span></td>
+            <td style="font-feature-settings:'tnum'">${esc(o.holder || "—")}</td>
+            <td class="text-muted">${esc(o.duty || "")}</td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+
+  const chronicle = `
+    ${sechead("Летопись · Annales", "Хроника Ордена", "Орден не ведёт публичной истории. Здесь — лишь вехи, которые дозволено помнить вслух.")}
+    <div style="max-width:660px">
+      ${(c.chronicle || []).map((e) => `
+        <div style="display:grid;grid-template-columns:92px 1fr;gap:18px;padding-bottom:24px">
+          <div style="text-align:right;font-family:'Cormorant Garamond',serif;font-size:20px;color:#c28d41;font-feature-settings:'tnum';padding-top:2px">${esc(e.year)}</div>
+          <div style="border-left:2px solid rgba(194,141,65,.35);padding:0 0 4px 18px;position:relative">
+            <span style="position:absolute;left:-6px;top:6px;width:10px;height:10px;border-radius:50%;background:#c28d41;border:2px solid #f3f2f2"></span>
+            <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px">${esc(e.title)}</div>
+            <p class="card-body" style="margin-top:3px">${esc(e.text || "")}</p>
+          </div>
+        </div>`).join("")}
+    </div>`;
+
+  const rituals = `
+    ${sechead("Ритуалы · Ritus", "Обряды капитула", "Обряды передаются из уст в уста и не описываются полностью. Здесь назван лишь их порядок и смысл.")}
+    <div style="max-width:640px;display:flex;flex-direction:column;gap:22px">
+      ${(c.rituals || []).map((r) => `
+        <div style="border-bottom:1px solid rgba(32,31,29,.1);padding-bottom:20px">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:19px">${esc(r.name)} <span class="text-muted" style="font-size:13px;font-style:italic">· ${esc(r.latin || "")}</span></div>
+          <p class="card-body" style="margin-top:4px">${esc(r.description || "")}</p>
+        </div>`).join("")}
+    </div>`;
+
+  const regalia = `
+    ${sechead("Регалии · Insignia", "Знаки и облачения", "Регалии не украшение, а язык. По ним читают степень и роль брата без единого слова.")}
+    <div class="grid-3">
+      ${(c.regalia || []).map((r) => `
+        <div class="card">
+          <div class="card-title">${esc(r.name)}</div>
+          <div class="card-kicker" style="color:#a06f24;font-style:italic;text-transform:none;letter-spacing:.04em">${esc(r.latin || "")}</div>
+          <p class="card-body">${esc(r.description || "")}</p>
+        </div>`).join("")}
+    </div>`;
+
+  const archive = `
+    ${sechead("Архив · Bibliotheca", "Архив XLIX", "Документы Ордена не покидают Архива. Доступ к каждому определяется степенью; копирование запрещено.")}
+    <table class="table">
+      <thead><tr><th>Название</th><th style="width:120px">Тип</th><th style="width:150px">Допуск</th><th>Примечание</th></tr></thead>
+      <tbody>
+        ${(c.archive || []).map((a) => `
+          <tr>
+            <td><span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:15px">${esc(a.title)}</span></td>
+            <td class="text-muted">${esc(a.kind || "")}</td>
+            <td><span class="tag tag-outline">${esc(a.min_degree || "—")}</span></td>
+            <td class="text-muted" style="font-size:13px">${esc(a.note || "")}</td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+
+  const sections = { cabinet, statut, degrees, officers, symbols, rituals, regalia, meetings, keepers, chronicle, archive };
+
+  const TABS = [
+    ["cabinet", "Капитул"], ["statut", "Устав"], ["degrees", "Степени"], ["officers", "Офицеры"],
+    ["symbols", "Символы"], ["rituals", "Ритуалы"], ["regalia", "Регалии"], ["meetings", "Собрания"],
+    ["keepers", "Хранители"], ["chronicle", "Летопись"], ["archive", "Архив"],
+  ];
 
   return `
-  <div style="min-height:100vh;display:flex;flex-direction:column;animation:sealFade .6s ease both">
+  <div class="lodge" style="min-height:100vh;display:flex;flex-direction:column;animation:sealFade .6s ease both;position:relative">
+    <div class="mosaic-strip" aria-hidden="true"></div>
+    <div class="lodge-watermark" aria-hidden="true">${SVG["delta"]}</div>
+    <div class="temple-columns" aria-hidden="true"><span>${SVG["columns"]}</span><span>${SVG["columns"]}</span></div>
+
     <header class="nav">
-      <div class="nav-brand" style="letter-spacing:.12em">ORDO XLIX</div>
-      <a href="#" data-tab="cabinet" ${cur("cabinet")}>Капитул</a>
-      <a href="#" data-tab="statut" ${cur("statut")}>Устав</a>
-      <a href="#" data-tab="meetings" ${cur("meetings")}>Собрания</a>
-      <a href="#" data-tab="keepers" ${cur("keepers")}>Хранители</a>
+      <div class="nav-brand" style="letter-spacing:.12em;display:flex;align-items:center;gap:9px">
+        <span class="brand-mark">${SVG["square-compass"]}</span>ORDO XLIX
+      </div>
+      ${TABS.map(([k, label]) => `<a href="#" data-tab="${k}" ${cur(k)}>${label}</a>`).join("")}
       <span class="tag tag-outline" style="font-family:'Cormorant Garamond',serif;letter-spacing:.08em">${esc(m.name || "")}</span>
       <a href="#" id="logout" title="Выйти" style="font-size:13px">Выход</a>
     </header>
 
-    <main style="width:100%;max-width:920px;margin:0 auto;padding:46px 28px 64px;flex:1">
+    <main style="width:100%;max-width:920px;margin:0 auto;padding:46px 28px 64px;flex:1;position:relative;z-index:1">
       ${sections[state.tab] || cabinet}
     </main>
 
-    <footer style="border-top:1px solid rgba(32,31,29,.16);padding:22px 28px;display:flex;align-items:center;gap:16px">
+    <footer style="border-top:1px solid rgba(32,31,29,.16);padding:20px 28px;display:flex;align-items:center;gap:16px;position:relative;z-index:1">
       <span style="font-family:'Cormorant Garamond',serif;font-size:15px;color:#605d5d">«Non eligis XLIX. XLIX eligit te.»</span>
       <span style="flex:1"></span>
-      <span id="flip" title="…" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#c28d41;cursor:pointer;user-select:none;display:inline-block;transition:transform .5s ease;font-feature-settings:'tnum';transform:${state.flipped ? "rotate(180deg)" : "none"}">49</span>
       ${state.flipped ? `<span style="font-size:11px;color:#a06f24;font-style:italic">Ты видишь обе. Полпути пройдено.</span>` : ""}
+      <span id="flip" title="…" class="footer-delta" style="transform:${state.flipped ? "rotate(180deg)" : "none"}">${SVG["delta"]}</span>
     </footer>
   </div>
   ${state.overlay ? overlayHtml() : ""}`;

@@ -261,3 +261,42 @@ textarea.input { min-height: 90px; resize: vertical; }
   .keep-grid { grid-template-columns: 1fr !important; }
   h1 { font-size: 34px !important; }
 }
+
+/* ══ Масонское оформление ложи (разделы Ordo XLIX) ══ */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+/* навигация: много вкладок — переносим строкой */
+.lodge .nav { flex-wrap: wrap; gap: 8px 16px; }
+.brand-mark { width: 26px; height: 26px; color: var(--color-accent-500); display: inline-block; }
+.brand-mark svg { width: 100%; height: 100%; display: block; }
+
+/* мозаичная полоса (чёрно-белый пол храма) */
+.mosaic-strip {
+  height: 9px;
+  background:
+    repeating-conic-gradient(#201f1d 0% 25%, #e7e2da 0% 50%) 0 0 / 18px 18px;
+  opacity: .5;
+}
+
+/* лучезарная дельта в подвале — пасхалка «49» */
+.footer-delta { width: 34px; height: 34px; color: var(--color-accent-500); cursor: pointer; display: inline-block; transition: transform .6s ease; }
+.footer-delta svg { width: 100%; height: 100%; display: block; }
+
+/* водяной знак дельты за страницей */
+.lodge-watermark { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 0; opacity: .04; color: #201f1d; }
+.lodge-watermark svg { width: min(60vw, 520px); height: auto; }
+
+/* колонны Иахин и Боаз по краям (только на широких экранах) */
+.temple-columns { display: none; }
+@media (min-width: 1320px) {
+  .temple-columns span { position: fixed; top: 50%; transform: translateY(-50%); width: 150px; height: 150px; color: var(--color-accent-700); opacity: .07; pointer-events: none; z-index: 0; }
+  .temple-columns span svg { width: 100%; height: 100%; }
+  .temple-columns span:first-child { left: 18px; }
+  .temple-columns span:last-child { right: 18px; }
+  .temple-columns { display: block; }
+}
+
+@media (max-width: 720px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr !important; }
+}

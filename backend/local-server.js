@@ -52,9 +52,67 @@ const DB = {
     { id:4, date:"7 октября 2026, 21:49", title:"Большой капитул", note:"Семь на семь: сорок девятое собрание года не объявляется", house:"—", access:"Второй круг", tag_class:"tag tag-accent", sort:4 },
   ],
   keepers: [
-    { id:1, name:"Дом Верден", since:"С 1749 года", duty:"Хранит Архив XLIX и жетон № XLIX-01, передававшийся внутри одной семьи более двухсот лет.", heir:"избран", sort:1 },
+    { id:1, name:"Дом Бернини", since:"С 1749 года", duty:"Основан Леонардо да Винчи. Хранит Архив XLIX и жетон № XLIX-01, передававшийся внутри одной семьи более двухсот лет.", heir:"избран", sort:1 },
     { id:2, name:"Дом Кассель", since:"С 1783 года", duty:"Хранит мастерскую. Все жетоны последних поколений вырезаны рукой мастеров этого дома.", heir:"избран", sort:2 },
     { id:3, name:"Дом Мори", since:"С 1821 года", duty:"Ведёт устные хроники Ордена. Ничего не записывает; помнит всё.", heir:"не назван", sort:3 },
+  ],
+  symbols: [
+    { id:1, name:"Наугольник и циркуль", latin:"Norma et Circinus", meaning:"Наугольник учит выверять поступки, циркуль — держать страсти в пределах.", glyph:"square-compass", sort:1 },
+    { id:2, name:"Всевидящее око", latin:"Oculus Providentiae", meaning:"Лучезарная дельта с оком напоминает о наблюдении Великого Строителя.", glyph:"eye", sort:2 },
+    { id:3, name:"Колонны Иахин и Боаз", latin:"Jachin et Boaz", meaning:"Две колонны у входа в храм — утверждение и сила.", glyph:"columns", sort:3 },
+    { id:4, name:"Ветвь акации", latin:"Acacia", meaning:"Знак бессмертия души и памяти о павшем мастере.", glyph:"acacia", sort:4 },
+    { id:5, name:"Отвес и уровень", latin:"Perpendiculum et Libella", meaning:"Прямота и равенство братьев.", glyph:"plumb", sort:5 },
+    { id:6, name:"Мозаичный пол", latin:"Pavimentum", meaning:"Свет и тьма, из которых соткана жизнь.", glyph:"mosaic", sort:6 },
+    { id:7, name:"Мастерок", latin:"Trulla", meaning:"Скрепляет камни известью братской любви.", glyph:"trowel", sort:7 },
+    { id:8, name:"Песочные часы", latin:"Clepsydra", meaning:"Время мастера ограничено, труд его — нет.", glyph:"hourglass", sort:8 },
+  ],
+  degrees: [
+    { id:1, name:"Ученик", latin:"Discipulus", rights:"Присутствие на открытых работах", duties:"Молчание и труд над грубым камнем", sort:1 },
+    { id:2, name:"Подмастерье", latin:"Socius", rights:"Изучение семи свободных искусств", duties:"Обтёсывать камень, служить старшим", sort:2 },
+    { id:3, name:"Мастер", latin:"Magister", rights:"Владеет словом и резцом; может передать знак", duties:"Хранить тайну, обучать младших", sort:3 },
+    { id:4, name:"Второй круг", latin:"Circulus Secundus", rights:"Допуск к хроникам Ордена", duties:"Беречь Архив от посторонних глаз", sort:4 },
+    { id:5, name:"Внутренний круг", latin:"Circulus Interior", rights:"Присутствие при передаче знака", duties:"Свидетельствовать без записи", sort:5 },
+    { id:6, name:"Хранители", latin:"Custodes", rights:"Совет семи; решают судьбу спорных жетонов", duties:"Хранить Архив XLIX и линии домов", sort:6 },
+  ],
+  officers: [
+    { id:1, role:"Досточтимый Мастер", latin:"Magister Venerabilis", holder:"№ XLIX-01", duty:"Руководит капитулом и открывает работы", sort:1 },
+    { id:2, role:"Первый Надзиратель", latin:"Vigil Primus", holder:"№ XLIX-07", duty:"Следит за подмастерьями, замыкает столбы", sort:2 },
+    { id:3, role:"Второй Надзиратель", latin:"Vigil Secundus", holder:"№ XLIX-12", duty:"Наставляет учеников, отмеряет время работ", sort:3 },
+    { id:4, role:"Оратор", latin:"Orator", holder:"№ XLIX-03", duty:"Хранит устав и произносит поучения", sort:4 },
+    { id:5, role:"Секретарь", latin:"Secretarius", holder:"не назван", duty:"Ведёт зодческие работы", sort:5 },
+    { id:6, role:"Казначей", latin:"Thesaurarius", holder:"№ XLIX-05", duty:"Хранит кружку милосердия", sort:6 },
+    { id:7, role:"Обрядоначальник", latin:"Magister Caeremoniarum", holder:"№ XLIX-09", duty:"Ведёт посвящаемого по храму", sort:7 },
+    { id:8, role:"Страж-привратник", latin:"Custos Portae", holder:"не назван", duty:"Стоит у дверей с обнажённым мечом", sort:8 },
+  ],
+  chronicle: [
+    { id:1, year:"1305", title:"Дом Джотто", text:"Вырезан первый жетон с обеими сорок девятками.", sort:1 },
+    { id:2, year:"1420", title:"Дом Брунеллески", text:"Построен первый тайный капитул.", sort:2 },
+    { id:3, year:"1466", title:"Дом Донателло", text:"Отлиты бронзовые знаки Совета семи.", sort:3 },
+    { id:4, year:"1508", title:"Дом Рафаэль", text:"Учреждена тайная переписка между домами.", sort:4 },
+    { id:5, year:"1512", title:"Дом Микеланджело", text:"Установлен канон пропорций жетона.", sort:5 },
+    { id:6, year:"1749", title:"Дом Бернини", text:"Леонардо да Винчи основывает Дом Бернини.", sort:6 },
+    { id:7, year:"MMXXVI", title:"Портал Ордена", text:"Цифровой капитул открыт для предъявляющих знак.", sort:7 },
+  ],
+  rituals: [
+    { id:1, name:"Приём в Орден", latin:"Receptio", description:"Знак оставляется незаметно; слово доверия передаётся из уст в уста.", sort:1 },
+    { id:2, name:"Передача знака", latin:"Traditio Signi", description:"Закрытая церемония; присутствие по жетону.", sort:2 },
+    { id:3, name:"Совет семи", latin:"Consilium Septem", description:"Семь хранителей решают судьбу спорного жетона.", sort:3 },
+    { id:4, name:"Годовой цикл", latin:"Annus", description:"Семь на семь: сорок девятое собрание года не объявляется.", sort:4 },
+    { id:5, name:"Молчание", latin:"Silentium", description:"О сказанном в капитуле не говорят за его пределами.", sort:5 },
+  ],
+  regalia: [
+    { id:1, name:"Жетон «49»", latin:"Signum", description:"Орех, ручная резьба, обе сорок девятки.", sort:1 },
+    { id:2, name:"Запон второго круга", latin:"Praecinctorium", description:"Кожаный фартук с тиснёной дельтой.", sort:2 },
+    { id:3, name:"Знак Хранителя", latin:"Insigne Custodis", description:"Бронзовая дельта на муаровой ленте.", sort:3 },
+    { id:4, name:"Перчатки", latin:"Chirothecae", description:"Белые перчатки — знак чистоты помыслов.", sort:4 },
+    { id:5, name:"Печать капитула", latin:"Sigillum", description:"Сургучный оттиск «XLIX».", sort:5 },
+  ],
+  archive: [
+    { id:1, title:"Хроники 1749–1812", kind:"Рукопись", min_degree:"Второй круг", note:"Чтение на Малом капитуле.", sort:1 },
+    { id:2, title:"Патент Дома Бернини", kind:"Патент", min_degree:"Хранители", note:"Копии запрещены.", sort:2 },
+    { id:3, title:"Толкование обеих сорок девяток", kind:"Трактат", min_degree:"Внутренний круг", note:"С пояснением наставника.", sort:3 },
+    { id:4, title:"Список утраченных жетонов", kind:"Реестр", min_degree:"Хранители", note:"Ведётся Домом Боттичелли.", sort:4 },
+    { id:5, title:"Устная Книга Мори", kind:"Предание", min_degree:"—", note:"Не подлежит записи.", sort:5 },
   ],
 };
 const COLS = {
@@ -62,6 +120,13 @@ const COLS = {
   rules: ["num","title","text","sort"],
   meetings: ["date","title","note","house","access","tag_class","sort"],
   keepers: ["name","since","duty","heir","sort"],
+  symbols: ["name","latin","meaning","glyph","sort"],
+  degrees: ["name","latin","rights","duties","sort"],
+  officers: ["role","latin","holder","duty","sort"],
+  chronicle: ["year","title","text","sort"],
+  rituals: ["name","latin","description","sort"],
+  regalia: ["name","latin","description","sort"],
+  archive: ["title","kind","min_degree","note","sort"],
 };
 const stripMember = (m) => { const { password_hash, ...r } = m; return r; };
 
@@ -76,7 +141,12 @@ function handle(req) {
   if (a === "content") {
     const p = verify(req.token); if (!p || p.kind!=="member") return err(401,"Требуется вход участника");
     const me = DB.members.find((x)=>x.id===p.sub);
-    return { rules: DB.rules, meetings: DB.meetings, keepers: DB.keepers, member: me?stripMember(me):null };
+    return {
+      rules: DB.rules, meetings: DB.meetings, keepers: DB.keepers,
+      symbols: DB.symbols, degrees: DB.degrees, officers: DB.officers,
+      chronicle: DB.chronicle, rituals: DB.rituals, regalia: DB.regalia, archive: DB.archive,
+      member: me?stripMember(me):null,
+    };
   }
   if (a === "admin.login") {
     const ad = DB.admins.find((x)=>x.login===req.login);

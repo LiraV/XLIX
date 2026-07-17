@@ -120,18 +120,25 @@ const handlers = {
     return { token, member: memberPublic(member) };
   },
 
-  // Контент кабинета: устав, собрания, хранители + свежий профиль участника.
+  // Контент кабинета: все разделы ложи + свежий профиль участника.
   async content({ _auth }) {
-    const [rules, meetings, keepers, me] = await Promise.all([
+    const [rules, meetings, keepers, symbols, degrees, officers, chronicle, rituals, regalia, archive, me] = await Promise.all([
       db().query("SELECT num, title, text FROM rules ORDER BY sort, id"),
       db().query("SELECT date, title, note, house, access, tag_class FROM meetings ORDER BY sort, id"),
       db().query("SELECT name, since, duty, heir FROM keepers ORDER BY sort, id"),
+      db().query("SELECT name, latin, meaning, glyph FROM symbols ORDER BY sort, id"),
+      db().query("SELECT name, latin, rights, duties FROM degrees ORDER BY sort, id"),
+      db().query("SELECT role, latin, holder, duty FROM officers ORDER BY sort, id"),
+      db().query("SELECT year, title, text FROM chronicle ORDER BY sort, id"),
+      db().query("SELECT name, latin, description FROM rituals ORDER BY sort, id"),
+      db().query("SELECT name, latin, description FROM regalia ORDER BY sort, id"),
+      db().query("SELECT title, kind, min_degree, note FROM archive ORDER BY sort, id"),
       db().query("SELECT * FROM members WHERE id = $1", [_auth.sub]),
     ]);
     return {
-      rules: rules.rows,
-      meetings: meetings.rows,
-      keepers: keepers.rows,
+      rules: rules.rows, meetings: meetings.rows, keepers: keepers.rows,
+      symbols: symbols.rows, degrees: degrees.rows, officers: officers.rows,
+      chronicle: chronicle.rows, rituals: rituals.rows, regalia: regalia.rows, archive: archive.rows,
       member: me.rows[0] ? memberPublic(me.rows[0]) : null,
     };
   },
@@ -201,6 +208,13 @@ function table(resource) {
     rules:    { name: "rules",    order: "sort, id", cols: ["num", "title", "text", "sort"], strip: (r) => r },
     meetings: { name: "meetings", order: "sort, id", cols: ["date", "title", "note", "house", "access", "tag_class", "sort"], strip: (r) => r },
     keepers:  { name: "keepers",  order: "sort, id", cols: ["name", "since", "duty", "heir", "sort"], strip: (r) => r },
+    symbols:  { name: "symbols",  order: "sort, id", cols: ["name", "latin", "meaning", "glyph", "sort"], strip: (r) => r },
+    degrees:  { name: "degrees",  order: "sort, id", cols: ["name", "latin", "rights", "duties", "sort"], strip: (r) => r },
+    officers: { name: "officers", order: "sort, id", cols: ["role", "latin", "holder", "duty", "sort"], strip: (r) => r },
+    chronicle:{ name: "chronicle",order: "sort, id", cols: ["year", "title", "text", "sort"], strip: (r) => r },
+    rituals:  { name: "rituals",  order: "sort, id", cols: ["name", "latin", "description", "sort"], strip: (r) => r },
+    regalia:  { name: "regalia",  order: "sort, id", cols: ["name", "latin", "description", "sort"], strip: (r) => r },
+    archive:  { name: "archive",  order: "sort, id", cols: ["title", "kind", "min_degree", "note", "sort"], strip: (r) => r },
   };
   const t = map[resource];
   if (!t) throw httpError(400, "Неизвестный ресурс");

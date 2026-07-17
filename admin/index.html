@@ -45,6 +45,13 @@
       <button class="btn btn-secondary" data-res="meetings">Собрания</button>
       <button class="btn btn-secondary" data-res="keepers">Хранители</button>
       <button class="btn btn-secondary" data-res="rules">Устав</button>
+      <button class="btn btn-secondary" data-res="symbols">Символы</button>
+      <button class="btn btn-secondary" data-res="degrees">Степени</button>
+      <button class="btn btn-secondary" data-res="officers">Офицеры</button>
+      <button class="btn btn-secondary" data-res="chronicle">Летопись</button>
+      <button class="btn btn-secondary" data-res="rituals">Ритуалы</button>
+      <button class="btn btn-secondary" data-res="regalia">Регалии</button>
+      <button class="btn btn-secondary" data-res="archive">Архив</button>
       <button id="logout" class="btn btn-ghost">Выход</button>
     </div>
     <div id="msg"></div>
@@ -64,8 +71,17 @@ const FIELDS = {
   meetings: [["date","Дата"],["title","Название"],["note","Примечание","area"],["house","Дом"],["access","Допуск"],["tag_class","CSS-класс метки"],["sort","Порядок","num"]],
   keepers:  [["name","Название"],["since","С какого года"],["duty","Обязанность","area"],["heir","Наследник"],["sort","Порядок","num"]],
   rules:    [["num","Номер (I, II…)"],["title","Заголовок"],["text","Текст","area"],["sort","Порядок","num"]],
+  symbols:  [["name","Символ"],["latin","Латынь"],["meaning","Толкование","area"],["glyph","Значок (square-compass, eye, columns, acacia, plumb, mosaic, trowel, hourglass, delta)"],["sort","Порядок","num"]],
+  degrees:  [["name","Степень"],["latin","Латынь"],["rights","Права","area"],["duties","Обязанности","area"],["sort","Порядок","num"]],
+  officers: [["role","Должность"],["latin","Латынь"],["holder","Жетон"],["duty","Обязанность","area"],["sort","Порядок","num"]],
+  chronicle:[["year","Год"],["title","Событие"],["text","Описание","area"],["sort","Порядок","num"]],
+  rituals:  [["name","Обряд"],["latin","Латынь"],["description","Описание","area"],["sort","Порядок","num"]],
+  regalia:  [["name","Регалия"],["latin","Латынь"],["description","Описание","area"],["sort","Порядок","num"]],
+  archive:  [["title","Название"],["kind","Тип"],["min_degree","Допуск (степень)"],["note","Примечание","area"],["sort","Порядок","num"]],
 };
-const TITLES = { members:"Участники", meetings:"Собрания", keepers:"Хранители", rules:"Устав" };
+const TITLES = { members:"Участники", meetings:"Собрания", keepers:"Хранители", rules:"Устав",
+  symbols:"Символы", degrees:"Степени", officers:"Офицеры", chronicle:"Летопись",
+  rituals:"Ритуалы", regalia:"Регалии", archive:"Архив" };
 
 async function api(action, payload = {}) {
   const res = await fetch(API, {
