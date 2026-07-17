@@ -20,6 +20,47 @@ const SVG = {
 };
 function glyph(key) { return SVG[key] || SVG["delta"]; }
 
+/* ── мини-графики (чистый SVG, без внешних библиотек) ────────────────────── */
+const CHART_COLORS = ["#c28d41", "#a06f24", "#7d5411", "#dbaf70", "#9b7232", "#605d5d"];
+
+function lineChart(points, opts = {}) {
+  const w = opts.w || 620, h = opts.h || 210, pad = { l: 30, r: 12, t: 14, b: 24 };
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  if (!points.length) return "";
+  const max = Math.max(...points.map((p) => p.value), 1);
+  const x = (i) => pad.l + (points.length < 2 ? 0 : (i / (points.length - 1)) * iw);
+  const y = (v) => pad.t + ih - (v / max) * ih;
+  const line = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(p.value).toFixed(1)}`).join(" ");
+  const area = `${line} L${x(points.length - 1).toFixed(1)} ${(pad.t + ih).toFixed(1)} L${x(0).toFixed(1)} ${(pad.t + ih).toFixed(1)} Z`;
+  const grid = [0, 0.25, 0.5, 0.75, 1].map((f) => { const yy = (pad.t + ih - f * ih).toFixed(1); return `<line x1="${pad.l}" y1="${yy}" x2="${w - pad.r}" y2="${yy}" stroke="rgba(32,31,29,.08)"/>`; }).join("");
+  const dots = points.map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="2.6" fill="#c28d41"/>`).join("");
+  const step = Math.max(1, Math.ceil(points.length / 6));
+  const labels = points.map((p, i) => (i % step === 0 || i === points.length - 1) ? `<text x="${x(i).toFixed(1)}" y="${h - 7}" font-size="10" text-anchor="middle" fill="#8d8371">${esc(p.label)}</text>` : "").join("");
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" style="display:block;overflow:visible" font-family="'Lora',serif">${grid}<path d="${area}" fill="rgba(194,141,65,.12)"/><path d="${line}" fill="none" stroke="#c28d41" stroke-width="2"/>${dots}${labels}</svg>`;
+}
+
+function polarSeg(cx, cy, r, ir, a1, a2) {
+  const large = (a2 - a1) > Math.PI ? 1 : 0;
+  const p = (rad, a) => [(cx + rad * Math.cos(a)).toFixed(2), (cy + rad * Math.sin(a)).toFixed(2)];
+  const [x1, y1] = p(r, a1), [x2, y2] = p(r, a2), [x3, y3] = p(ir, a2), [x4, y4] = p(ir, a1);
+  return `M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${x3} ${y3} A${ir} ${ir} 0 ${large} 0 ${x4} ${y4} Z`;
+}
+function donutChart(items, opts = {}) {
+  const size = opts.size || 180, r = size / 2 - 2, ir = r * 0.56, cx = size / 2, cy = size / 2;
+  const total = items.reduce((s, i) => s + Number(i.value || 0), 0) || 1;
+  let a = -Math.PI / 2;
+  const arcs = items.map((it, idx) => { const a2 = a + (Number(it.value || 0) / total) * 2 * Math.PI; const seg = polarSeg(cx, cy, r, ir, a, a2); a = a2; return `<path d="${seg}" fill="${CHART_COLORS[idx % CHART_COLORS.length]}"/>`; }).join("");
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="display:block">${arcs}<circle cx="${cx}" cy="${cy}" r="${ir - 0.5}" fill="#f3f2f2"/><text x="${cx}" y="${cy - 1}" text-anchor="middle" font-size="20" font-family="'Cormorant Garamond',serif" fill="#c28d41">49</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="9" fill="#8d8371">сфер</text></svg>`;
+}
+function barChart(items) {
+  const max = Math.max(...items.map((i) => Number(i.value || 0)), 1);
+  return `<div style="display:flex;flex-direction:column;gap:9px">${items.map((it, idx) => `
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>${esc(it.name)}</span><span class="text-muted" style="font-feature-settings:'tnum'">${esc(it.value)}%</span></div>
+      <div style="height:8px;background:rgba(32,31,29,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:${(Number(it.value) / max * 100).toFixed(1)}%;background:${CHART_COLORS[idx % CHART_COLORS.length]};border-radius:4px"></div></div>
+    </div>`).join("")}</div>`;
+}
+
 const state = {
   token: sessionStorage.getItem("ordo_token") || null,
   member: safeParse(sessionStorage.getItem("ordo_member")),
@@ -312,11 +353,67 @@ function viewUnlocked() {
       </tbody>
     </table>`;
 
-  const sections = { cabinet, statut, degrees, officers, symbols, rituals, regalia, meetings, keepers, chronicle, archive };
+  const influence = `
+    ${sechead("Влияние · Potentia", "Орден и настоящее время", "Старый Орден не исчез — он врос в современный мир. Так Дом Кассель оценивает присутствие XLIX. Цифры символичны, как и всё в Ордене.")}
+    <div class="kpi-row">
+      ${(c.kpis || []).map((k) => `
+        <div class="card kpi"><div class="kpi-val">${esc(k.value)}</div><div class="kpi-label">${esc(k.label)}</div><div class="card-meta">${esc(k.note || "")}</div></div>`).join("")}
+    </div>
+    <div class="dash-grid">
+      <div class="card"><div class="card-kicker">Рост влияния · 1749 → 2026</div>${lineChart((c.growth || []).map((g) => ({ label: g.year, value: Number(g.value) })))}</div>
+      <div class="card"><div class="card-kicker">Сферы влияния</div>
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+          <div style="flex:none">${donutChart(c.spheres || [])}</div>
+          <div style="flex:1;min-width:190px">${barChart(c.spheres || [])}</div>
+        </div>
+      </div>
+    </div>`;
+
+  const dossier = `
+    ${sechead("Досье · Dossier", "Личности Ордена", "Раздел содержит легенды, слухи и вымысел. Орден не подтверждает ни одной связи — списков он не ведёт.")}
+    <div class="grid-2">
+      ${(c.personae || []).map((p) => `
+        <div class="card" style="flex-direction:row;gap:16px;align-items:flex-start">
+          <div class="monogram">${esc(p.monogram || "·")}</div>
+          <div>
+            <div class="card-title">${esc(p.name)}</div>
+            <div class="card-kicker" style="text-transform:none;letter-spacing:.03em;color:#a06f24">${esc(p.role || "")}${p.era ? " · " + esc(p.era) : ""}</div>
+            <p class="card-body" style="margin-top:6px">${esc(p.bio || "")}</p>
+            <div class="card-meta" style="font-style:italic">${esc(p.link || "")}</div>
+          </div>
+        </div>`).join("")}
+    </div>`;
+
+  const acta = `
+    ${sechead("Бюллетени · Acta", "Хроники нового времени", "Орден говорит редко и намёками. Здесь — то немногое, что просочилось наружу о деньгах, крипте, технологиях и небе.")}
+    <div style="display:flex;flex-direction:column;gap:14px;max-width:720px">
+      ${(c.bulletins || []).map((b) => `
+        <div class="card" style="flex-direction:row;gap:16px;align-items:flex-start">
+          <div style="flex:none;width:92px">
+            <div style="font-feature-settings:'tnum';font-size:12px;color:#8d8371">${esc(b.date || "")}</div>
+            <span class="tag tag-accent" style="margin-top:6px">${esc(b.tag || "")}</span>
+          </div>
+          <div><div class="card-title" style="font-size:18px">${esc(b.title)}</div><p class="card-body" style="margin-top:4px">${esc(b.text || "")}</p></div>
+        </div>`).join("")}
+    </div>`;
+
+  const contactSec = `
+    ${sechead("Контакт · Contactus", "То, что выше звёзд", "Самая закрытая тема Ордена. Обе сорок девятки, по преданию, глядят в два мира сразу. Ниже — легенды, не подлежащие проверке.")}
+    <div class="grid-2">
+      ${(c.contact || []).map((x) => `
+        <div class="card">
+          <div class="card-title">${esc(x.name)}</div>
+          <div class="card-kicker" style="text-transform:none;letter-spacing:.03em;color:#a06f24;font-style:italic">${esc(x.latin || "")}</div>
+          <p class="card-body">${esc(x.description || "")}</p>
+        </div>`).join("")}
+    </div>`;
+
+  const sections = { cabinet, influence, dossier, acta, contact: contactSec, statut, degrees, officers, symbols, rituals, regalia, meetings, keepers, chronicle, archive };
 
   const TABS = [
-    ["cabinet", "Капитул"], ["statut", "Устав"], ["degrees", "Степени"], ["officers", "Офицеры"],
-    ["symbols", "Символы"], ["rituals", "Ритуалы"], ["regalia", "Регалии"], ["meetings", "Собрания"],
+    ["cabinet", "Капитул"], ["influence", "Влияние"], ["dossier", "Досье"], ["acta", "Бюллетени"], ["contact", "Контакт"],
+    ["statut", "Устав"], ["degrees", "Степени"], ["officers", "Офицеры"], ["symbols", "Символы"],
+    ["rituals", "Ритуалы"], ["regalia", "Регалии"], ["meetings", "Собрания"],
     ["keepers", "Хранители"], ["chronicle", "Летопись"], ["archive", "Архив"],
   ];
 

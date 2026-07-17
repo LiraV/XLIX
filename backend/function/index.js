@@ -120,25 +120,35 @@ const handlers = {
     return { token, member: memberPublic(member) };
   },
 
-  // Контент кабинета: все разделы ложи + свежий профиль участника.
+  // Контент кабинета: все разделы ложи + современные разделы + профиль.
   async content({ _auth }) {
-    const [rules, meetings, keepers, symbols, degrees, officers, chronicle, rituals, regalia, archive, me] = await Promise.all([
-      db().query("SELECT num, title, text FROM rules ORDER BY sort, id"),
-      db().query("SELECT date, title, note, house, access, tag_class FROM meetings ORDER BY sort, id"),
-      db().query("SELECT name, since, duty, heir FROM keepers ORDER BY sort, id"),
-      db().query("SELECT name, latin, meaning, glyph FROM symbols ORDER BY sort, id"),
-      db().query("SELECT name, latin, rights, duties FROM degrees ORDER BY sort, id"),
-      db().query("SELECT role, latin, holder, duty FROM officers ORDER BY sort, id"),
-      db().query("SELECT year, title, text FROM chronicle ORDER BY sort, id"),
-      db().query("SELECT name, latin, description FROM rituals ORDER BY sort, id"),
-      db().query("SELECT name, latin, description FROM regalia ORDER BY sort, id"),
-      db().query("SELECT title, kind, min_degree, note FROM archive ORDER BY sort, id"),
-      db().query("SELECT * FROM members WHERE id = $1", [_auth.sub]),
+    const q = (sql, ...a) => db().query(sql, a);
+    const [rules, meetings, keepers, symbols, degrees, officers, chronicle, rituals, regalia, archive,
+           kpis, growth, spheres, personae, bulletins, contact, me] = await Promise.all([
+      q("SELECT num, title, text FROM rules ORDER BY sort, id"),
+      q("SELECT date, title, note, house, access, tag_class FROM meetings ORDER BY sort, id"),
+      q("SELECT name, since, duty, heir FROM keepers ORDER BY sort, id"),
+      q("SELECT name, latin, meaning, glyph FROM symbols ORDER BY sort, id"),
+      q("SELECT name, latin, rights, duties FROM degrees ORDER BY sort, id"),
+      q("SELECT role, latin, holder, duty FROM officers ORDER BY sort, id"),
+      q("SELECT year, title, text FROM chronicle ORDER BY sort, id"),
+      q("SELECT name, latin, description FROM rituals ORDER BY sort, id"),
+      q("SELECT name, latin, description FROM regalia ORDER BY sort, id"),
+      q("SELECT title, kind, min_degree, note FROM archive ORDER BY sort, id"),
+      q("SELECT label, value, note FROM kpis ORDER BY sort, id"),
+      q("SELECT year, value FROM growth ORDER BY sort, id"),
+      q("SELECT name, value, note FROM spheres ORDER BY sort, id"),
+      q("SELECT name, role, era, monogram, bio, link FROM personae ORDER BY sort, id"),
+      q("SELECT date, tag, title, text FROM bulletins ORDER BY sort, id"),
+      q("SELECT name, latin, description FROM contact ORDER BY sort, id"),
+      q("SELECT * FROM members WHERE id = $1", _auth.sub),
     ]);
     return {
       rules: rules.rows, meetings: meetings.rows, keepers: keepers.rows,
       symbols: symbols.rows, degrees: degrees.rows, officers: officers.rows,
       chronicle: chronicle.rows, rituals: rituals.rows, regalia: regalia.rows, archive: archive.rows,
+      kpis: kpis.rows, growth: growth.rows, spheres: spheres.rows,
+      personae: personae.rows, bulletins: bulletins.rows, contact: contact.rows,
       member: me.rows[0] ? memberPublic(me.rows[0]) : null,
     };
   },
@@ -215,6 +225,12 @@ function table(resource) {
     rituals:  { name: "rituals",  order: "sort, id", cols: ["name", "latin", "description", "sort"], strip: (r) => r },
     regalia:  { name: "regalia",  order: "sort, id", cols: ["name", "latin", "description", "sort"], strip: (r) => r },
     archive:  { name: "archive",  order: "sort, id", cols: ["title", "kind", "min_degree", "note", "sort"], strip: (r) => r },
+    kpis:     { name: "kpis",     order: "sort, id", cols: ["label", "value", "note", "sort"], strip: (r) => r },
+    growth:   { name: "growth",   order: "sort, id", cols: ["year", "value", "sort"], strip: (r) => r },
+    spheres:  { name: "spheres",  order: "sort, id", cols: ["name", "value", "note", "sort"], strip: (r) => r },
+    personae: { name: "personae", order: "sort, id", cols: ["name", "role", "era", "monogram", "bio", "link", "sort"], strip: (r) => r },
+    bulletins:{ name: "bulletins",order: "sort, id", cols: ["date", "tag", "title", "text", "sort"], strip: (r) => r },
+    contact:  { name: "contact",  order: "sort, id", cols: ["name", "latin", "description", "sort"], strip: (r) => r },
   };
   const t = map[resource];
   if (!t) throw httpError(400, "Неизвестный ресурс");

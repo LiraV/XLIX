@@ -114,6 +114,47 @@ const DB = {
     { id:4, title:"Список утраченных жетонов", kind:"Реестр", min_degree:"Хранители", note:"Ведётся Домом Боттичелли.", sort:4 },
     { id:5, title:"Устная Книга Мори", kind:"Предание", min_degree:"—", note:"Не подлежит записи.", sort:5 },
   ],
+  kpis: [
+    { id:1, label:"Капитал под влиянием", value:"≈ 4,9 трлн ₽", note:"по оценке Дома Кассель", sort:1 },
+    { id:2, label:"Домов-хранителей", value:"13", note:"на пяти континентах", sort:2 },
+    { id:3, label:"Жетонов в обращении", value:"≈ 490", note:"из них 49 — первого круга", sort:3 },
+    { id:4, label:"Лет истории", value:"721", note:"с 1305 года", sort:4 },
+  ],
+  growth: [
+    { id:1, year:"1749", value:5, sort:1 }, { id:2, year:"1800", value:9, sort:2 }, { id:3, year:"1850", value:14, sort:3 },
+    { id:4, year:"1900", value:22, sort:4 }, { id:5, year:"1950", value:35, sort:5 }, { id:6, year:"1980", value:48, sort:6 },
+    { id:7, year:"2000", value:63, sort:7 }, { id:8, year:"2010", value:74, sort:8 }, { id:9, year:"2020", value:89, sort:9 }, { id:10, year:"2026", value:97, sort:10 },
+  ],
+  spheres: [
+    { id:1, name:"Финансы и деньги", value:27, note:"банки, фонды", sort:1 },
+    { id:2, name:"Криптовалюты", value:22, note:"узлы, протоколы", sort:2 },
+    { id:3, name:"Технологии", value:18, note:"ИИ, связь", sort:3 },
+    { id:4, name:"Политика", value:15, note:"кулуары", sort:4 },
+    { id:5, name:"Медиа", value:10, note:"внимание", sort:5 },
+    { id:6, name:"Космос и контакт", value:8, note:"выше звёзд", sort:6 },
+  ],
+  personae: [
+    { id:1, name:"Леонардо да Винчи", role:"Основатель Дома Бернини", era:"1452–1519", monogram:"ЛВ", bio:"Художник, инженер и провидец. По летоисчислению Ордена вывел канон обеих сорок девяток.", link:"Основал Дом Бернини; оставил чертёж жетона.", sort:1 },
+    { id:2, name:"Джанлоренцо Бернини", role:"Мастер-резчик", era:"1598–1680", monogram:"ДБ", bio:"Скульптор, давший имя старшему дому.", link:"Дом Бернини хранит его инструмент.", sort:2 },
+    { id:3, name:"Сатоси Накамото", role:"Анонимный брат", era:"наши дни", monogram:"SN", bio:"Имя, за которым, по молве, скрывается казначейство Ордена. Не подтверждено.", link:"Слухи связывают первые 49 сатоши с меткой дельты.", sort:3 },
+    { id:4, name:"Илон Маск", role:"Молва Запада", era:"наши дни", monogram:"ЭМ", bio:"Молва приписывает Ордену интерес к тем, кто тянется к звёздам. Ничего не подтверждено.", link:"По слухам — «звёздный контакт». Non confirmatur.", sort:4 },
+    { id:5, name:"Дональд Трамп", role:"Молва Запада", era:"наши дни", monogram:"ДТ", bio:"Конспирологи вписывают громкие имена в тайные списки. Орден списков не ведёт.", link:"Приписываемая связь. Орден комментариев не даёт.", sort:5 },
+    { id:6, name:"Владимир Путин", role:"Молва Востока", era:"наши дни", monogram:"ВП", bio:"Всякому влиятельному лицу молва приписывает тайные ложи. Это вымысел и слухи.", link:"Приписываемая связь. Non confirmatur.", sort:6 },
+  ],
+  bulletins: [
+    { id:1, date:"MMXXVI · I", tag:"Крипта", title:"Дельта в блокчейне", text:"Слух: первые 49 сатоши помечены символом дельты. Цепь молчит, как и Орден.", sort:1 },
+    { id:2, date:"MMXXVI · II", tag:"Деньги", title:"Казна без имени", text:"Казначей отчитывается лишь перед Советом семи.", sort:2 },
+    { id:3, date:"MMXXVI · III", tag:"Технологии", title:"ИИ и канон пропорций", text:"Дом Микеланджело изучает, повторяет ли машинный разум канон «49».", sort:3 },
+    { id:4, date:"MMXXVI · IV", tag:"Политика", title:"Саммит без имён", text:"Жетон предъявляется вместо имени. Кто присутствовал — не записывают.", sort:4 },
+    { id:5, date:"MMXXVI · V", tag:"Космос", title:"Сигнал XLIX", text:"Радиометка 1949 года и число Ордена совпали. Дом Мори считает это ответом.", sort:5 },
+    { id:6, date:"MMXXVI · VI", tag:"Развитие", title:"Цифровой капитул", text:"Портал открыт: старый Орден говорит через экран, не изменяя обету молчания.", sort:6 },
+  ],
+  contact: [
+    { id:1, name:"Звёздные братья", latin:"Fratres Stellarum", description:"Обе сорок девятки — отражение двух миров: земного и надзвёздного.", sort:1 },
+    { id:2, name:"Сигнал 1949", latin:"Signum Caeleste", description:"В год, созвучный числу Ордена, принят сигнал неизвестного происхождения.", sort:2 },
+    { id:3, name:"Розуэлл", latin:"Casus Roswell", description:"1947-й породил слухи о контакте — за два года до сигнала.", sort:3 },
+    { id:4, name:"Наблюдатели", latin:"Custodes Caeli", description:"Те, кто, по легенде, следят за домами извне.", sort:4 },
+  ],
 };
 const COLS = {
   members: ["name","token_number","degree","line","admitted","status"],
@@ -127,6 +168,12 @@ const COLS = {
   rituals: ["name","latin","description","sort"],
   regalia: ["name","latin","description","sort"],
   archive: ["title","kind","min_degree","note","sort"],
+  kpis: ["label","value","note","sort"],
+  growth: ["year","value","sort"],
+  spheres: ["name","value","note","sort"],
+  personae: ["name","role","era","monogram","bio","link","sort"],
+  bulletins: ["date","tag","title","text","sort"],
+  contact: ["name","latin","description","sort"],
 };
 const stripMember = (m) => { const { password_hash, ...r } = m; return r; };
 
@@ -145,6 +192,8 @@ function handle(req) {
       rules: DB.rules, meetings: DB.meetings, keepers: DB.keepers,
       symbols: DB.symbols, degrees: DB.degrees, officers: DB.officers,
       chronicle: DB.chronicle, rituals: DB.rituals, regalia: DB.regalia, archive: DB.archive,
+      kpis: DB.kpis, growth: DB.growth, spheres: DB.spheres,
+      personae: DB.personae, bulletins: DB.bulletins, contact: DB.contact,
       member: me?stripMember(me):null,
     };
   }

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ordo XLIX · Управление</title>
-<link rel="stylesheet" href="../styles.css?v=3">
+<link rel="stylesheet" href="../styles.css?v=4">
 <style>
   html, body { margin: 0; background: #f3f2f2; }
   [hidden] { display: none !important; }
@@ -52,6 +52,12 @@
       <button class="btn btn-secondary" data-res="rituals">Ритуалы</button>
       <button class="btn btn-secondary" data-res="regalia">Регалии</button>
       <button class="btn btn-secondary" data-res="archive">Архив</button>
+      <button class="btn btn-secondary" data-res="personae">Досье</button>
+      <button class="btn btn-secondary" data-res="bulletins">Бюллетени</button>
+      <button class="btn btn-secondary" data-res="contact">Контакт</button>
+      <button class="btn btn-secondary" data-res="kpis">Показатели</button>
+      <button class="btn btn-secondary" data-res="growth">Рост</button>
+      <button class="btn btn-secondary" data-res="spheres">Сферы</button>
       <button id="logout" class="btn btn-ghost">Выход</button>
     </div>
     <div id="msg"></div>
@@ -78,10 +84,18 @@ const FIELDS = {
   rituals:  [["name","Обряд"],["latin","Латынь"],["description","Описание","area"],["sort","Порядок","num"]],
   regalia:  [["name","Регалия"],["latin","Латынь"],["description","Описание","area"],["sort","Порядок","num"]],
   archive:  [["title","Название"],["kind","Тип"],["min_degree","Допуск (степень)"],["note","Примечание","area"],["sort","Порядок","num"]],
+  kpis:     [["label","Показатель"],["value","Значение"],["note","Примечание"],["sort","Порядок","num"]],
+  growth:   [["year","Год"],["value","Влияние (0–100)","num"],["sort","Порядок","num"]],
+  spheres:  [["name","Сфера"],["value","Доля, %","num"],["note","Примечание"],["sort","Порядок","num"]],
+  personae: [["name","Имя"],["role","Роль"],["era","Эпоха"],["monogram","Монограмма (2 буквы)"],["bio","Биография","area"],["link","Связь с Орденом","area"],["sort","Порядок","num"]],
+  bulletins:[["date","Дата"],["tag","Тег (Крипта, Деньги, Технологии, Политика, Космос, Развитие)"],["title","Заголовок"],["text","Текст","area"],["sort","Порядок","num"]],
+  contact:  [["name","Название"],["latin","Латынь"],["description","Описание","area"],["sort","Порядок","num"]],
 };
 const TITLES = { members:"Участники", meetings:"Собрания", keepers:"Хранители", rules:"Устав",
   symbols:"Символы", degrees:"Степени", officers:"Офицеры", chronicle:"Летопись",
-  rituals:"Ритуалы", regalia:"Регалии", archive:"Архив" };
+  rituals:"Ритуалы", regalia:"Регалии", archive:"Архив",
+  kpis:"Показатели", growth:"Рост влияния", spheres:"Сферы влияния",
+  personae:"Досье", bulletins:"Бюллетени", contact:"Контакт" };
 
 async function api(action, payload = {}) {
   const res = await fetch(API, {
